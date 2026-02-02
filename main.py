@@ -185,7 +185,7 @@ while running:
         if event.type == pygame.QUIT: ## makes the game stop running when quit by closing window
             running = False
         if event.type == pygame.KEYDOWN: ## makes the game stop running when quit with escape key
-            if event.key == K_ESCAPE:
+            if event.key == pygame.K_ESCAPE:
                 running = False
         if event.type == pygame.MOUSEBUTTONDOWN: ## detects any mouse button input
             if event.button == 1: ## detects left click (left click = 1, middle click = 2, right click = 3, scroll up = 4, scroll down = 5)
