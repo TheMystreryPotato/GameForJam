@@ -1,0 +1,211 @@
+import pygame, sys
+
+## sets up pygame & window
+from pygame.locals import *
+pygame.init()
+screen = pygame.display.set_mode((1200, 600))
+clock = pygame.time.Clock()
+pygame.display.set_caption('base of game')
+font = pygame.font.SysFont('Comic Sans MS', 30)
+
+
+##loads background image + scales it properly
+bkg_img = pygame.image.load('bkg_img.jpg').convert()
+bkg_img2 = pygame.transform.scale(bkg_img, (1200, 600))
+
+x = 0
+
+## variables & data n such
+running = True
+forwards = True
+cardCount = 5
+leftClick = False
+rightClick = False
+middleClick = False
+select1 = False
+select2 = False
+select3 = False
+select4 = False
+select5 = False
+select6 = False
+card6Setup = False
+offset = [425, 450]
+card1ypos = offset[0]
+card2ypos = offset[0]
+card3ypos = offset[0]
+card4ypos = offset[0]
+card5ypos = offset[0]
+card6hb = pygame.Rect(0, 0, 0, 0)
+
+delta_time = 0.1
+
+##loads test image & test cards 
+image = pygame.Surface((176, 64))
+card1 = pygame.Surface((100, 120)) ## cards have a 5:7 ratio of length to height
+card2 = pygame.Surface((100, 120))
+card3 = pygame.Surface((100, 120))
+card4 = pygame.Surface((100, 120))
+card5 = pygame.Surface((100, 120))
+card6 = pygame.Surface((100, 120))
+
+
+while running:
+    
+    card1xpos = (800 / cardCount) - 100
+    card2xpos = (2 * (800 / cardCount)) - 100
+    card3xpos = (3 * (800 / cardCount)) - 100
+    card4xpos = (4 * (800 / cardCount)) - 100
+    card5xpos = (5 * (800 / cardCount)) - 100
+
+    mpos = pygame.mouse.get_pos() ## gets mouse position
+
+
+    ## rotation & location setup
+    rot = 0
+    loc = [0, 0]
+
+    if middleClick == True:
+        colors = 173
+
+    ## mouse position
+    mx, my = pygame.mouse.get_pos()
+
+    ## makes an image i guess
+    screen.blit(bkg_img2, (0, 0))
+    
+    ## makes a test image & test cards
+    screen.blit(image, (x, 0))
+    screen.blit(card1, (card1xpos, card1ypos))
+    screen.blit(card2, (card2xpos, card2ypos))
+    screen.blit(card3, (card3xpos, card3ypos))
+    screen.blit(card4, (card4xpos, card4ypos))
+    screen.blit(card5, (card5xpos, card5ypos))
+
+
+
+    ## hitbox test
+    hitbox = pygame.Rect(x, 0, image.get_width(), image.get_height())
+    card1hb = pygame.Rect(card1xpos, card1ypos, card1.get_width(), card1.get_height())
+    card2hb = pygame.Rect(card2xpos, card2ypos, card2.get_width(), card2.get_height())
+    card3hb = pygame.Rect(card3xpos, card3ypos, card3.get_width(), card3.get_height())
+    card4hb = pygame.Rect(card4xpos, card4ypos, card4.get_width(), card4.get_height())
+    card5hb = pygame.Rect(card5xpos, card5ypos, card5.get_width(), card5.get_height())
+
+
+    ## if selected = True:
+        ##
+
+
+
+    ## makes target & gives collision
+    target = pygame.Rect(300, 0, 160, 280)
+    collision = hitbox.colliderect(target)
+    m_collision = target.collidepoint(mpos) ## mouse collision w/target
+    m_collision1 = card1hb.collidepoint(mpos) ## mouse collision w/card1
+    m_collision2 = card2hb.collidepoint(mpos) ## mouse collision w/card2
+    m_collision3 = card3hb.collidepoint(mpos) ## mouse collision w/card3
+    m_collision4 = card4hb.collidepoint(mpos) ## mouse collision w/card4
+    m_collision5 = card5hb.collidepoint(mpos) ## mouse collision w/card5
+
+    pygame.draw.rect(screen, (255 * collision, 255 * m_collision, 0), target)
+
+    pygame.draw.rect(screen, (255 * collision, 255 * m_collision1, 0), card1hb)
+    pygame.draw.rect(screen, (255 * collision, 255 * m_collision2, 0), card2hb)
+    pygame.draw.rect(screen, (255 * collision, 255 * m_collision3, 0), card3hb)
+    pygame.draw.rect(screen, (255 * collision, 255 * m_collision4, 0), card4hb)
+    pygame.draw.rect(screen, (255 * collision, 255 * m_collision5, 0), card5hb)
+
+
+    ## test for if there's 6 cards rather than 5
+    if cardCount == 6 and card6Setup == False:
+        card6xpos = (6 * (800 / cardCount)) - 100
+        card6ypos = offset[0] ## currently facing a bug where card 6 cannot be selected, or at least does not visually show as such...
+        screen.blit(card6, (card6xpos, card6ypos))
+        card6hb = pygame.Rect(card6xpos, card6ypos, card6.get_width(), card6.get_height())
+        card6Setup = True
+    m_collision6 = card6hb.collidepoint(mpos) ## mouse collision w/card6
+    pygame.draw.rect(screen, (255 * collision, 255 * m_collision6, 0), card6hb)
+
+
+    ## leftClick detection; flips between 'selected' and 'unselected' states when right clicked, and changer their position slightly to signify
+    if leftClick == True:
+        if pygame.Rect.collidepoint(card1hb, mx, my):
+            select1 = not select1
+            if select1 == True:
+                card1ypos = offset[1]
+            else:
+                card1ypos = offset[0]
+        if pygame.Rect.collidepoint(card2hb, mx, my):
+            select2 = not select2
+            if select2 == True:
+                card2ypos = offset[1]
+            else:
+                card2ypos = offset[0]
+        if pygame.Rect.collidepoint(card3hb, mx, my):
+            select3 = not select3
+            if select3 == True:
+                card3ypos = offset[1]
+            else:
+                card3ypos = offset[0]
+        if pygame.Rect.collidepoint(card4hb, mx, my):
+            select4 = not select4
+            if select4 == True:
+                card4ypos = offset[1]
+            else:
+                card4ypos = offset[0]
+        if pygame.Rect.collidepoint(card5hb, mx, my):
+            select5 = not select5
+            if select5 == True:
+                card5ypos = offset[1]
+            else:
+                card5ypos = offset[0]
+        if cardCount == 6:
+            if pygame.Rect.collidepoint(card6hb, mx, my):
+                select6 = not select6
+                if select6 == True:
+                    card6ypos = offset[1]
+                else:
+                    card6ypos = offset[0]
+
+
+    ## stupid test collision thingy
+    if forwards == True:
+        x += 100 * delta_time
+    else:
+        x -= 100 * delta_time
+    if x > (1000 - image.get_width()):
+        forwards = False
+    if x < 0:
+        forwards = True
+    
+    
+    leftClick = False ## resets left click each frame
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT: ## makes the game stop running when quit by closing window
+            running = False
+        if event.type == pygame.KEYDOWN: ## makes the game stop running when quit with escape key
+            if event.key == K_ESCAPE:
+                running = False
+        if event.type == pygame.MOUSEBUTTONDOWN: ## detects any mouse button input
+            if event.button == 1: ## detects left click (left click = 1, middle click = 2, right click = 3, scroll up = 4, scroll down = 5)
+                leftClick = True
+            if event.button == 3: ## detects right click
+                rightClick = True
+            if event.button == 2: ## detects middle click
+                middleClick = not middleClick
+                cardCount = 6
+        if event.type == pygame.MOUSEBUTTONUP: ## detects any mouse button let go
+            if event.button == 3: ## detects right click let go, right click is for holding
+                rightClick = False
+
+
+
+    ## makes it actually display on the screen, i guess
+    pygame.display.flip()
+
+    ## ticks clock, uses delta time
+    delta_time = clock.tick(60) / 1000
+    delta_time = max(0.001, min(0.1, delta_time))
+
+pygame.quit()
