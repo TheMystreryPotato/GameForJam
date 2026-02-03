@@ -4,7 +4,9 @@ import random
 ## sets up pygame & window
 from pygame.locals import *
 pygame.init()
-screen = pygame.display.set_mode((1100, 600))
+screenx = 1100
+screeny = 600
+screen = pygame.display.set_mode((screenx, screeny))
 clock = pygame.time.Clock()
 pygame.display.set_caption('base of game')
 font = pygame.font.SysFont('Comic Sans MS', 30)
@@ -70,6 +72,9 @@ HeartsKing = pygame.image.load('CardImages\King_Hearts.png').convert_alpha()
 DiamondsKing = pygame.image.load('CardImages\King_Diamonds.png').convert_alpha()
 GrayJoker = pygame.image.load('CardImages\Grey_Joker.png').convert_alpha()
 ColorJoker = pygame.image.load('CardImages\Color_Joker.png').convert_alpha()
+SettingsButton = pygame.image.load('AssetImages\Settings_Button.png').convert_alpha()
+SelectDeck = pygame.image.load('AssetImages\Select_Deck.png').convert_alpha()
+
 
 ## x
 x = 0
@@ -96,7 +101,8 @@ select5 = False
 select6 = False
 card6Setup = False ## useless, for now
 settingsUp = False
-offset = [425, 450]
+deckSelectUp = False
+offset = [(screeny - 175), (screeny - 150)]
 card1ypos = offset[0]
 card2ypos = offset[0]
 card3ypos = offset[0]
@@ -104,6 +110,8 @@ card4ypos = offset[0]
 card5ypos = offset[0]
 card6ypos = offset[0]
 card6hb = pygame.Rect(0, 0, 0, 0)
+deckSelectButtonhb = pygame.Rect(0, 0, 0, 0)
+deckSelectScreenhb = pygame.Rect(0, 0, 0, 0)
 deck = [ClubsAce, SpadesAce, HeartsAce, DiamondsAce, Clubs2, Spades2, Hearts2, Diamonds2, Clubs3, Spades3, Hearts3, Diamonds3, Clubs4, Spades4, Hearts4, Diamonds4, Clubs5, Spades5, Hearts5, Diamonds5, Clubs6, Spades6, Hearts6, Diamonds6, Clubs7, Spades7, Hearts7, Diamonds7, Clubs8, Spades8, Hearts8, Diamonds8, Clubs9, Spades9, Hearts9, Diamonds9, Clubs10, Spades10, Hearts10, Diamonds10, ClubsJack, SpadesJack, HeartsJack, DiamondsJack, ClubsQueen, SpadesQueen, HeartsQueen, DiamondsQueen, ClubsKing, SpadesKing, HeartsKing, DiamondsKing, GrayJoker, ColorJoker]
 shuffledDeck = random.sample(deck, len(deck))
 
@@ -117,8 +125,12 @@ card3 = shuffledDeck[2]
 card4 = shuffledDeck[3]
 card5 = shuffledDeck[4]
 card6 = pygame.Surface((100, 120))
-settingsButton = pygame.Surface((50, 50))
-settingsScreen = pygame.Surface((1100, 600))
+settingsButton = SettingsButton
+settingsScreen = pygame.Surface((screenx, screeny))
+deckSelectButton = SelectDeck 
+deckSelectScreen = pygame.Surface((screenx, screeny))
+playHandButton = pygame.Surface((100, 50)) ## add to once there's a sprite image for it
+playActionCardButton = pygame.Surface((100, 50)) ## add to once there's a sprite image for it
 
 while running:
     
@@ -128,16 +140,22 @@ while running:
     ##
 
     ## equally spaces cards based on the amount of cards
-    card1xpos = (800 / cardCount) - 100
-    card2xpos = (2 * (800 / cardCount)) - 100
-    card3xpos = (3 * (800 / cardCount)) - 100
-    card4xpos = (4 * (800 / cardCount)) - 100
-    card5xpos = (5 * (800 / cardCount)) - 100
+    card1xpos = ((screenx - 200) / cardCount) - 100
+    card2xpos = (2 * ((screenx - 200) / cardCount)) - 100
+    card3xpos = (3 * ((screenx - 200) / cardCount)) - 100
+    card4xpos = (4 * ((screenx - 200) / cardCount)) - 100
+    card5xpos = (5 * ((screenx - 200) / cardCount)) - 100
     if cardCount == 6:
-        card6xpos = (6 * (800 / cardCount)) - 100
+        card6xpos = (6 * ((screenx - 200) / cardCount)) - 100
         card6 = shuffledDeck[5]
     else:
         card6xpos = 1200
+
+    ## creates play hand and play action card buttons
+    screen.blit(playHandButton, ((screenx - 175), (screeny - 75)))
+    playHandButtonhb = pygame.Rect((screenx - 175), (screeny - 75), playHandButton.get_width(), playHandButton.get_height())
+    screen.blit(playActionCardButton, ((screenx - 125), (screeny - 75)))
+    playActionCardButtonhb = pygame.Rect((screenx - 125), (screeny - 75), playActionCardButton.get_width(), playActionCardButton.get_height())
 
     ## gets mouse position
     mpos = pygame.mouse.get_pos()
@@ -153,9 +171,16 @@ while running:
     ## mouse position
     mx, my = pygame.mouse.get_pos()
 
+    ## useless, here as vestidious code, kept around to make it clear that frame rate is still functioning fine
+    hitbox = pygame.Rect(x, 0, image.get_width(), image.get_height())
+    target = pygame.Rect(300, 0, 160, 280) ## makes target & gives collision
+    collision = hitbox.colliderect(target)
+    m_collision = target.collidepoint(mpos) ## signifies mouse collision w/target using colors
+    pygame.draw.rect(screen, (255 * collision, 255 * m_collision, 0), target)
+
+
 
     ## hitbox test
-    hitbox = pygame.Rect(x, 0, image.get_width(), image.get_height())
     card1hb = pygame.Rect(card1xpos, card1ypos, card1.get_width(), card1.get_height())
     card2hb = pygame.Rect(card2xpos, card2ypos, card2.get_width(), card2.get_height())
     card3hb = pygame.Rect(card3xpos, card3ypos, card3.get_width(), card3.get_height())
@@ -170,17 +195,26 @@ while running:
     screen.blit(card3, (card3xpos, card3ypos))
     screen.blit(card4, (card4xpos, card4ypos))
     screen.blit(card5, (card5xpos, card5ypos))
-    screen.blit(card6, (card6xpos, card6ypos))
+    screen.blit(card6, (card6xpos, card6ypos))    
 
-    
-    ## makes the settings button
-    screen.blit(settingsButton, (1025, 25))
-    settingsButtonhb = pygame.Rect(1025, 25, settingsButton.get_width(), settingsButton.get_height())
-    
+    ## here, eventually, add a while loop so it only checks for clicks on these objects while settings screen is up
+
+
     ## makes the settings screen
     settingsScreenhb = pygame.Rect(0, 0, settingsScreen.get_width(), settingsScreen.get_height())
     if settingsUp == True:
         screen.blit(settingsScreen, (0, 0))
+        settingsScreen.blit(font.render('Settings', True, (0, 255, 0)), ((screenx - 1075), 25))
+
+        ## makes the deck selecting screen
+        deckSelectScreenhb = pygame.Rect(0, 0, deckSelectScreen.get_width(), deckSelectScreen.get_height())
+        if deckSelectUp == True:
+            screen.blit(deckSelectScreen, (0, 0))
+            deckSelectScreen.blit(font.render('Deck Selection:', True, (0, 255, 0)), ((screenx - 1075), 25))
+        
+        ## makes the deck selecting button
+        screen.blit(deckSelectButton, ((screenx - 125), 100))
+        deckSelectButtonhb = pygame.Rect((screenx - 75), 100, deckSelectButton.get_width(), deckSelectButton.get_height())
 
 
 
@@ -228,12 +262,9 @@ while running:
             cardSelectedCount -= 1
             countTracker6 = False
 
-
-    ## makes target & gives collision
-    target = pygame.Rect(300, 0, 160, 280)
-    collision = hitbox.colliderect(target)
-    m_collision = target.collidepoint(mpos) ## signifies mouse collision w/target using colors
-    pygame.draw.rect(screen, (255 * collision, 255 * m_collision, 0), target)
+    ## makes the settings button
+    screen.blit(settingsButton, ((screenx - 75), 25))
+    settingsButtonhb = pygame.Rect((screenx - 75), 25, settingsButton.get_width(), settingsButton.get_height())
 
 
     ## leftClick detection; flips between 'selected' and 'unselected' states when right clicked, and changes their position accordingly
@@ -277,6 +308,10 @@ while running:
                 select6 = not select6
     if leftClick == True and pygame.Rect.collidepoint(settingsButtonhb, mx, my):
         settingsUp = not settingsUp
+        if deckSelectUp == True:
+            deckSelectUp = not deckSelectUp
+    if leftClick == True and pygame.Rect.collidepoint(deckSelectButtonhb, mx, my):
+            deckSelectUp = not deckSelectUp
 
 
     ## stupid test collision thingy
@@ -291,7 +326,6 @@ while running:
     
     
     leftClick = False ## resets left click each frame
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT: ## makes the game stop running when quit by closing window
             running = False
