@@ -82,14 +82,17 @@ x = 0
 ## variables & data n such
 running = True
 forwards = True
-cardCount = 5
+cardCount = 7
 cardSelectedCount = 0
+handValue = 0
 countTracker1 = False
 countTracker2 = False
 countTracker3 = False
 countTracker4 = False
 countTracker5 = False
 countTracker6 = False
+countTracker7 = False
+countTracker8 = False
 leftClick = False
 rightClick = False
 middleClick = False
@@ -99,9 +102,12 @@ select3 = False
 select4 = False
 select5 = False
 select6 = False
-card6Setup = False ## useless, for now
+select7 = False
+select8 = False
+card8Setup = False ## useless, for now
 settingsUp = False
 deckSelectUp = False
+lastHandValueTracker = False
 offset = [(screeny - 175), (screeny - 150)]
 card1ypos = offset[0]
 card2ypos = offset[0]
@@ -109,13 +115,55 @@ card3ypos = offset[0]
 card4ypos = offset[0]
 card5ypos = offset[0]
 card6ypos = offset[0]
-card6hb = pygame.Rect(0, 0, 0, 0)
+card7ypos = offset[0]
+card8ypos = offset[0]
+card8hb = pygame.Rect(0, 0, 0, 0)
 deckSelectButtonhb = pygame.Rect(0, 0, 0, 0)
 deckSelectScreenhb = pygame.Rect(0, 0, 0, 0)
 deck = [ClubsAce, SpadesAce, HeartsAce, DiamondsAce, Clubs2, Spades2, Hearts2, Diamonds2, Clubs3, Spades3, Hearts3, Diamonds3, Clubs4, Spades4, Hearts4, Diamonds4, Clubs5, Spades5, Hearts5, Diamonds5, Clubs6, Spades6, Hearts6, Diamonds6, Clubs7, Spades7, Hearts7, Diamonds7, Clubs8, Spades8, Hearts8, Diamonds8, Clubs9, Spades9, Hearts9, Diamonds9, Clubs10, Spades10, Hearts10, Diamonds10, ClubsJack, SpadesJack, HeartsJack, DiamondsJack, ClubsQueen, SpadesQueen, HeartsQueen, DiamondsQueen, ClubsKing, SpadesKing, HeartsKing, DiamondsKing, GrayJoker, ColorJoker]
 shuffledDeck = random.sample(deck, len(deck))
+## playedHand = PokerHand(add stuff here) be able to add the selected cards
 
 delta_time = 0.1
+
+class PokerHand:
+    def __init__(self, cards):
+        self.cards = cards
+        self.tags = set()
+        self.evaluate_hand()
+
+    def evaluate_hand(self):
+        pass  ## placeholder for hand eval. logic
+        
+        ## later, add a system to rank the values of any high card comparatively on a 0-99 scale, i guess
+
+        lastHandValueTracker = False
+        if self.is_straight_flush():
+            handValue = 9
+        elif self.is_four_of_a_kind():
+            handValue = 8
+        elif self.is_full_house():
+            handValue = 7
+        elif self.is_flush():
+            handValue = 6
+        elif self.is_straight():
+            handValue = 5
+        elif self.is_three_of_a_kind():
+            handValue = 4
+        elif self.is_two_pair():
+            handValue = 3
+        elif self.is_pair():
+            handValue = 2
+        elif self.is_high_card():
+            handValue = 1
+
+
+
+
+
+
+
+
 
 ##loads test images & test cards 
 image = pygame.Surface((176, 64))
@@ -124,7 +172,9 @@ card2 = shuffledDeck[1]
 card3 = shuffledDeck[2]
 card4 = shuffledDeck[3]
 card5 = shuffledDeck[4]
-card6 = pygame.Surface((100, 120))
+card6 = shuffledDeck[5]
+card7 = shuffledDeck[6]
+card8 = pygame.Surface((100, 120))
 settingsButton = SettingsButton
 settingsScreen = pygame.Surface((screenx, screeny))
 deckSelectButton = SelectDeck 
@@ -145,11 +195,14 @@ while running:
     card3xpos = (3 * ((screenx - 200) / cardCount)) - 100
     card4xpos = (4 * ((screenx - 200) / cardCount)) - 100
     card5xpos = (5 * ((screenx - 200) / cardCount)) - 100
-    if cardCount == 6:
-        card6xpos = (6 * ((screenx - 200) / cardCount)) - 100
-        card6 = shuffledDeck[5]
+    card6xpos = (6 * ((screenx - 200) / cardCount)) - 100
+    card7xpos = (7 * ((screenx - 200) / cardCount)) - 100
+
+    if cardCount == 8:
+        card8xpos = (8 * ((screenx - 200) / cardCount)) - 100
+        card8 = shuffledDeck[7]
     else:
-        card6xpos = 1200
+        card8xpos = 1200
 
     ## creates play hand and play action card buttons
     screen.blit(playHandButton, ((screenx - 175), (screeny - 75)))
@@ -166,7 +219,9 @@ while running:
 
     ## makes middle click do something, for now sets card count to 6 for testing purposes
     if middleClick == True:
-        cardCount = 6
+        cardCount = 8
+    else:
+        cardCount = 7
 
     ## mouse position
     mx, my = pygame.mouse.get_pos()
@@ -187,6 +242,8 @@ while running:
     card4hb = pygame.Rect(card4xpos, card4ypos, card4.get_width(), card4.get_height())
     card5hb = pygame.Rect(card5xpos, card5ypos, card5.get_width(), card5.get_height())
     card6hb = pygame.Rect(card6xpos, card6ypos, card6.get_width(), card6.get_height())
+    card7hb = pygame.Rect(card7xpos, card7ypos, card7.get_width(), card7.get_height())
+    card8hb = pygame.Rect(card8xpos, card8ypos, card8.get_width(), card8.get_height())
 
     ## makes a test image & test cards
     screen.blit(image, (x, 0))
@@ -196,9 +253,18 @@ while running:
     screen.blit(card4, (card4xpos, card4ypos))
     screen.blit(card5, (card5xpos, card5ypos))
     screen.blit(card6, (card6xpos, card6ypos))    
+    screen.blit(card7, (card7xpos, card7ypos))    
+    screen.blit(card8, (card8xpos, card8ypos))    
+
+    
+    ## hand score tracking
+    screen.blit(font.render((f'Previous Hand Score: {handValue}'), True, (0, 255, 0)), (25, 25))
+    if lastHandValueTracker == False:
+        pass ## i forget what i was doing here..... i think it's a system to keep the previous hand value up until the next one appears
+
+
 
     ## here, eventually, add a while loop so it only checks for clicks on these objects while settings screen is up
-
 
     ## makes the settings screen
     settingsScreenhb = pygame.Rect(0, 0, settingsScreen.get_width(), settingsScreen.get_height())
@@ -224,48 +290,61 @@ while running:
 
     ## tracks the amount of cards currently selected, likely very inefficently... 
     ## also broken!!!!!!!!
-    if select1 == True and countTracker1 == False:
-        cardSelectedCount += 1
-        countTracker1 = True
-    elif select1 == False and countTracker1 == True:
-        cardSelectedCount -= 1
-        countTracker1 = False
-    if select2 == True and countTracker2 == False:
+    ## if select1 == True and countTracker1 == False:
+    ##    cardSelectedCount += 1
+    ##    countTracker1 = True
+    ## if select1 == False and countTracker1 == True:
+    ##    cardSelectedCount -= 1
+    ##    countTracker1 = False
+    ## if select2 == True and countTracker2 == False:
         cardSelectedCount += 1
         countTracker2 = True
-    elif select2 == False and countTracker2 == True:
+    ## if select2 == False and countTracker2 == True:
         cardSelectedCount -= 1
         countTracker2 = False
-    if select3 == True and countTracker3 == False:
+    ## if select3 == True and countTracker3 == False:
         cardSelectedCount += 1
         countTracker3 = True
-    elif select3 == False and countTracker3 == True:
+    ## if select3 == False and countTracker3 == True:
         cardSelectedCount -= 1
         countTracker3 = False
-    if select4 == True and countTracker4 == False:
+    ## if select4 == True and countTracker4 == False:
         cardSelectedCount += 1
         countTracker4 = True
-    elif select4 == False and countTracker4 == True:
+    ## if select4 == False and countTracker4 == True:
         cardSelectedCount -= 1
         countTracker4 = False
-    if select5 == True and countTracker5 == False:
+    ## if select5 == True and countTracker5 == False:
         cardSelectedCount += 1
         countTracker5 = True
-    elif select5 == False and countTracker5 == True:
+    ## if select5 == False and countTracker5 == True:
         cardSelectedCount -= 1
         countTracker5 = False
-    if cardCount == 6:
-        if select6 == True and countTracker6 == False:
+    ## if select6 == True and countTracker6 == False:
+        cardSelectedCount += 1
+        countTracker6 = True
+    ## if select6 == False and countTracker6 == True:
+        cardSelectedCount -= 1
+        countTracker6 = False
+    ## if select7 == True and countTracker7 == False:
+        cardSelectedCount += 1
+        countTracker7 = True
+    ## if select7 == False and countTracker7 == True:
+        cardSelectedCount -= 1
+        countTracker7 = False
+    ## if cardCount == 8:
+        if select8 == True and countTracker8 == False:
             cardSelectedCount += 1
-            countTracker6 = True
-        elif select6 == False and countTracker6 == True:
+            countTracker8 = True
+        elif select8 == False and countTracker8 == True:
             cardSelectedCount -= 1
-            countTracker6 = False
+            countTracker8 = False
 
     ## makes the settings button
     screen.blit(settingsButton, ((screenx - 75), 25))
     settingsButtonhb = pygame.Rect((screenx - 75), 25, settingsButton.get_width(), settingsButton.get_height())
 
+    
 
     ## leftClick detection; flips between 'selected' and 'unselected' states when right clicked, and changes their position accordingly
     if leftClick == True and settingsUp == False:
@@ -299,13 +378,25 @@ while running:
             else:
                 card5ypos = offset[0]
             select5 = not select5
-        if pygame.Rect.collidepoint(card6hb, mx, my): ## currently facing a bug where card 6 cannot be selected, or at least does not visually show as such...
-            if cardCount == 6: 
-                if select6 == True and cardSelectedCount <= 5:
-                    card6ypos = offset[1]
+        if pygame.Rect.collidepoint(card6hb, mx, my):
+            if select6 == True and cardSelectedCount <= 5:
+                card6ypos = offset[1]
+            else:
+                card6ypos = offset[0]
+            select6 = not select6
+        if pygame.Rect.collidepoint(card7hb, mx, my):
+            if select7 == True and cardSelectedCount <= 5:
+                card7ypos = offset[1]
+            else:
+                card7ypos = offset[0]
+            select7 = not select7
+        if pygame.Rect.collidepoint(card8hb, mx, my): ## currently facing a bug where card 8 cannot be selected, or at least does not visually show as such...
+            if cardCount == 8: 
+                if select8 == True and cardSelectedCount <= 5:
+                    card8ypos = offset[1]
                 else:
-                    card6ypos = offset[0]
-                select6 = not select6
+                    card8ypos = offset[0]
+                select8 = not select8
     if leftClick == True and pygame.Rect.collidepoint(settingsButtonhb, mx, my):
         settingsUp = not settingsUp
         if deckSelectUp == True:
